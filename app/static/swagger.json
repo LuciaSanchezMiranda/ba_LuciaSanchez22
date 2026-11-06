@@ -53,14 +53,13 @@
         }
       }
     },
- "/analytics/sales-total": {
-
+    "/analytics/sales-total": {
       "get": {
         "tags": [
           "Indicadores SQL Server"
         ],
         "summary": "Obtener ventas totales",
-        "description": "Obtiene el total de ventas utilizando información transaccional almacenada en SQL Server.",
+        "description": "Calcula el total histórico de ventas o filtra por año (1 a 9999), mes (1 a 12) o ambos. Si solo se envía month, incluye ese mes de todos los años. Sin coincidencias devuelve data: 0. Los valores vacíos o no enteros son inválidos.\n\nPrueba en Try it out: sin valores = histórico; year=2026 = año; month=1 = enero de todos los años; year=2026 y month=1 = enero de 2026. Para comprobar HTTP 400, envía year=abc o month=15. La validación se realiza en el backend.",
         "responses": {
           "200": {
             "description": "Indicador generado correctamente",
@@ -71,29 +70,23 @@
                   "type": "string",
                   "example": "sales_total"
                 },
-
                 "title": {
                   "type": "string",
                   "example": "Ventas Totales"
                 },
-
-
                 "chart_type": {
                   "type": "string",
                   "example": "card"
                 },
-
                 "data": {
                   "type": "number",
-                  "example": 5052.00
+                  "example": 5052.0
                 },
-
                 "sources": {
                   "type": "array",
                   "items": {
                     "type": "string"
                   },
-
                   "example": [
                     "SQL Server"
                   ]
@@ -101,44 +94,60 @@
               }
             }
           },
-
           "500": {
             "description": "Error interno del servidor"
+          },
+          "400": {
+            "description": "Parámetros inválidos: se devuelven todos los errores de tipo o rango.",
+            "schema": {
+              "type": "object",
+              "required": [
+                "message",
+                "errors"
+              ],
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "examples": {
+              "application/json": {
+                "message": "Error en los parámetros enviados",
+                "errors": [
+                  "El año debe ser un número entero",
+                  "El mes debe estar entre 1 y 12"
+                ]
+              }
+            }
           }
-        }
-      }
-    },
-
-    "/analytics/sales-by-month": {
-      "get": {
-        "tags": ["Indicadores SQL Server"],
-        "summary": "Obtener ventas agrupadas por mes",
-        "description": "Agrupa las ventas por año y mes. Permite filtrar por año.",
+        },
         "parameters": [
           {
             "name": "year",
             "in": "query",
-            "description": "Año que se desea consultar. El Backend valida el formato y el rango.",
+            "description": "Año de las ventas: entero entre 1 y 9999. Opcional.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "month",
+            "in": "query",
+            "description": "Mes de las ventas: entero entre 1 y 12. Sin year incluye todos los años.",
             "required": false,
             "type": "string"
           }
         ],
-        "responses": {
-          "200": {
-            "description": "Ventas agrupadas por mes",
-            "schema": {
-              "$ref": "#/definitions/SalesByMonthResponse"
-            }
-          },
-          "400": {
-            "description": "Parámetros inválidos"
-          },
-          "500": {
-            "description": "Error interno del servidor"
-          }
-        }
+        "operationId": "sales_total"
       }
     },
+
     "/analytics/products-by-category": {
       "get": {
         "tags": ["Indicadores MongoDB"],

@@ -11,6 +11,7 @@ swagger_bp = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
     config={
-        "app_name": "Backend Analítico API"
+        "app_name": "Backend Analítico API",
+        "deepLinking": True,
     }
 )

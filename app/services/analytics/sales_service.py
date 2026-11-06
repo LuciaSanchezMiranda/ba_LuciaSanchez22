@@ -13,9 +13,9 @@ class SalesService:
 
 
 
-    def total_sales(self):
+    def total_sales(self, year=None, month=None):
 
-        result = self.repository.get_total_sales()
+        result = self.repository.get_total_sales(year=year, month=month)
 
 
 

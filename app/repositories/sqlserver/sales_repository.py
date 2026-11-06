@@ -9,31 +9,33 @@ class SalesRepository:
     # Total de ventas
     # ==========================================
 
-    def get_total_sales(self):
+    def get_total_sales(self, year=None, month=None):
+        query = """
+            SELECT COALESCE(SUM(total_amount), 0)
+            FROM sales
+        """
+        conditions = []
+        params = []
+
+        if year is not None:
+            conditions.append("YEAR(sale_date) = ?")
+            params.append(year)
+
+        if month is not None:
+            conditions.append("MONTH(sale_date) = ?")
+            params.append(month)
+
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
 
         connection = get_sqlserver_connection()
-
-        cursor = connection.cursor()
-
-
-        query = """
-        SELECT 
-            SUM(total_amount)
-        FROM sales
-        """
-
-
-        cursor.execute(query)
-
-
-        result = cursor.fetchone()
-
-
-        connection.close()
-
-
-        return result[0]
-
+        try:
+            cursor = connection.cursor()
+            cursor.execute(query, params)
+            result = cursor.fetchone()
+            return float(result[0] or 0)
+        finally:
+            connection.close()
 
 
     # ==========================================
